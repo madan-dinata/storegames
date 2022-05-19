@@ -1,1 +1,1 @@
-# storegame server
+# Store Game Server
