@@ -2,17 +2,16 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
-import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import logger from 'morgan';
 import path from 'path';
 
-import server from './app/category/router.js';
+import { PORT, MONGO } from './config/config.js';
 
-dotenv.config();
+import dashboardRouter from './app/dashboard/router.js';
+import categoryRouter from './app/category/router.js';
 
 const app = express();
-const PORT = process.env.PORT || 3000;
 const __dirname = path.resolve('');
 
 // view engine setup
@@ -27,10 +26,16 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/adminlte', express.static(path.join(__dirname, '/node_modules/admin-lte/')));
 
+mongoose
+  .connect(MONGO)
+  .then(() => console.log('database conected'))
+  .catch((err) => console.log('error', err));
+
 app.get('/', (req, res) => {
-  res.render('index');
+  res.render('index', { title: 'Home' });
 });
 
-app.use(server);
+app.use('/', dashboardRouter);
+app.use('/category', categoryRouter);
 
-app.listen(3000, () => console.log(`Listening on port ${PORT}`));
+app.listen(PORT, () => console.log(`Listening on port ${PORT}`));
